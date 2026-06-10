@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Mundial 2026</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0B1622;--bg2:#0F1D2E;--card:#142238;--card2:#182E4A;
+  --border:#1E3A5F;--accent:#00E5FF;--gold:#FFD700;
+  --green:#4CAF50;--green2:#1B5E20;--amber:#FFC107;--red:#F44336;
+  --text:#E8EAF0;--text2:#8899AA;--text3:#556677;
+}
+html{font-size:14px}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+.header{position:sticky;top:0;z-index:100;background:linear-gradient(135deg,#0B1622 0%,#142238 100%);border-bottom:1px solid var(--border);padding:0.5rem 0.75rem}
+.header-top{display:flex;align-items:center;justify-content:space-between}
+.header h1{font-size:1.15rem;font-weight:700;background:linear-gradient(90deg,var(--accent),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.5px;line-height:1.2}
+.header h1 span{font-size:0.65rem;display:block;font-weight:400;-webkit-text-fill-color:var(--text2);background:none;margin-top:1px}
+.header-actions{display:flex;align-items:center;gap:0.5rem}
+.btn-icon{width:2rem;height:2rem;border-radius:50%;border:1px solid var(--border);background:var(--card);color:var(--text2);font-size:0.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+.btn-icon:hover{background:var(--card2);color:var(--text)}
+.btn-icon.danger{border-color:rgba(244,67,54,0.4);color:var(--red)}
+.btn-icon.danger:hover{background:var(--red);color:white}
+.tabs{display:flex;gap:0.2rem;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin-top:0.4rem;padding-bottom:2px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:0.35rem 0.65rem;border-radius:0.4rem;border:1px solid transparent;background:transparent;color:var(--text3);font-size:0.75rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all 0.2s;letter-spacing:0.3px}
+.tab:hover{background:var(--card);color:var(--text2)}
+.tab.active{background:var(--card2);color:var(--accent);border-color:rgba(0,229,255,0.3)}
+.tab.gold.active{color:var(--gold);border-color:rgba(255,215,0,0.3)}
+
+.content{display:none;padding:0.5rem 0.5rem 2rem;max-width:1400px;margin:0 auto}
+.content.active{display:block}
+
+.group-filter{display:flex;gap:0.2rem;overflow-x:auto;padding:0.4rem 0;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin-bottom:0.4rem}
+.group-filter::-webkit-scrollbar{display:none}
+.filter-btn{padding:0.3rem 0.55rem;border-radius:0.35rem;border:1px solid var(--border);background:var(--bg2);color:var(--text3);font-size:0.7rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:all 0.15s;letter-spacing:0.5px}
+.filter-btn:hover{background:var(--card);color:var(--text2)}
+.filter-btn.active{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+
+.progress-bar{height:3px;background:var(--card);border-radius:2px;margin:0.4rem 0 0.3rem;overflow:hidden}
+.progress-bar .fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--gold));border-radius:2px;transition:width 0.3s}
+.progress-text{font-size:0.65rem;color:var(--text3)}
+
+.matchday-label{font-size:0.7rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1.5px;padding:0.65rem 0 0.2rem;border-bottom:1px solid var(--border);margin-bottom:0.4rem;display:flex;justify-content:space-between;align-items:center}
+.matchday-date{color:var(--text3);font-weight:400;font-size:0.65rem;letter-spacing:0}
+
+.match-card{background:var(--card);border-radius:0.6rem;border:1px solid var(--border);margin-bottom:0.4rem;overflow:hidden;transition:border-color 0.2s,background 0.2s}
+.match-card:hover{border-color:rgba(0,229,255,0.3)}
+.match-card.played{border-left:3px solid var(--green)}
+.match-meta{display:flex;justify-content:space-between;padding:0.25rem 0.65rem;font-size:0.6rem;color:var(--text3);border-bottom:1px solid rgba(30,58,95,0.4)}
+.match-meta .group-label{font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;font-size:0.6rem}
+.match-body{display:flex;align-items:center;padding:0.45rem 0.6rem;gap:0.25rem}
+.team{flex:1;display:flex;align-items:center;gap:0.3rem;min-width:0}
+.team.away{flex-direction:row-reverse;text-align:right}
+.team-name{font-size:0.82rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.2}
+.team-name.long{font-size:0.72rem}
+.result-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin:0 2px}
+.result-dot.w{background:var(--green)}
+.result-dot.d{background:var(--amber)}
+.result-dot.l{background:var(--red)}
+
+.score-box{display:flex;align-items:center;gap:0.1rem;flex-shrink:0}
+.score-box .dash{color:var(--text3);font-weight:300;font-size:0.85rem;margin:0 1px}
+.score-input{width:2.1rem;height:2.1rem;text-align:center;border-radius:0.35rem;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-size:0.95rem;font-weight:700;font-family:inherit;outline:none;-moz-appearance:textfield;transition:border-color 0.2s,box-shadow 0.2s}
+.score-input::-webkit-outer-spin-button,.score-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.score-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,229,255,0.25)}
+.score-input.has-value{border-color:rgba(76,175,80,0.5);background:rgba(76,175,80,0.08)}
+
+.ko-match-card{background:var(--card);border-radius:0.6rem;border:1px solid var(--border);margin-bottom:0.4rem;overflow:hidden;transition:border-color 0.2s}
+.ko-match-card.played{border-left:3px solid var(--green)}
+.ko-match-meta{padding:0.25rem 0.65rem;font-size:0.6rem;color:var(--text3);border-bottom:1px solid rgba(30,58,95,0.4);display:flex;justify-content:space-between}
+.ko-match-body{display:flex;align-items:center;padding:0.45rem 0.6rem}
+.ko-team{flex:1;display:flex;align-items:center;gap:0.3rem;min-width:0;overflow:hidden}
+.ko-team.away{flex-direction:row-reverse;text-align:right}
+.ko-team .name{font-size:0.78rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ko-team .placeholder{font-size:0.65rem;color:var(--gold);font-weight:500;font-style:italic}
+.ko-score{display:flex;align-items:center;gap:0.1rem;flex-shrink:0}
+.ko-score .dash{color:var(--text3);font-size:0.85rem;margin:0 1px}
+.ko-score input{width:2.1rem;height:2.1rem;text-align:center;border-radius:0.35rem;border:1px solid var(--border);background:var(--bg2);color:var(--text);font-size:0.95rem;font-weight:700;font-family:inherit;outline:none;-moz-appearance:textfield;transition:border-color 0.2s,box-shadow 0.2s}
+.ko-score input::-webkit-outer-spin-button,.ko-score input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.ko-score input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(0,229,255,0.25)}
+.ko-score input.has-value{border-color:rgba(76,175,80,0.5);background:rgba(76,175,80,0.08)}
+
+.round-label{font-size:0.8rem;font-weight:700;color:var(--gold);padding:0.6rem 0 0.2rem;border-bottom:1px solid var(--border);margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:1px}
+
+.group-section{margin-bottom:0.6rem}
+.group-title{font-size:0.8rem;font-weight:700;color:var(--accent);padding:0.4rem 0 0.15rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.group-title .chevron{transition:transform 0.2s;font-size:0.65rem;color:var(--text3)}
+.group-title.collapsed .chevron{transform:rotate(-90deg)}
+.group-table-wrap{overflow-x:auto;margin-bottom:0.5rem;-webkit-overflow-scrolling:touch}
+.group-table{width:100%;border-collapse:collapse;font-size:0.72rem}
+.group-table th{background:var(--card2);padding:0.35rem 0.25rem;text-align:center;font-weight:700;color:var(--text2);border-bottom:1px solid var(--border);font-size:0.6rem;white-space:nowrap;text-transform:uppercase;letter-spacing:0.5px}
+.group-table th.team-col{text-align:left;padding-left:0.4rem;min-width:90px}
+.group-table td{padding:0.35rem 0.25rem;text-align:center;border-bottom:1px solid rgba(30,58,95,0.25);white-space:nowrap}
+.group-table td.team-col{text-align:left;padding-left:0.4rem;font-weight:500}
+.group-table td.pos{font-weight:700;width:1.3rem;color:var(--text3);font-size:0.65rem}
+.group-table td.pts{font-weight:800;color:var(--accent);font-size:0.75rem}
+.group-table tr.qualify td.pos{color:var(--green)}
+.group-table td.gf, .group-table td.gc, .group-table td.dg{color:var(--text2)}
+.group-table td.dg.pos-dg{font-weight:600}
+
+.team-cell{display:flex;align-items:center;gap:0.25rem;min-width:0}
+.team-cell .name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.72rem;line-height:1.2}
+.team-cell .code{color:var(--text3);font-size:0.55rem;font-weight:500;margin-left:auto;flex-shrink:0}
+
+.prob-bar{height:4px;background:var(--bg);border-radius:2px;margin-top:2px;display:flex;overflow:hidden;gap:1px}
+.prob-bar .seg{height:100%;transition:width 0.3s}
+.prob-bar .p1{background:var(--green)}
+.prob-bar .p2{background:var(--accent)}
+.prob-bar .p3{background:var(--amber)}
+.prob-bar .p4{background:var(--red)}
+.prob-cell{width:50px}
+.prob-text{font-size:0.6rem;color:var(--text3);margin-top:1px;text-align:center}
+.prob-text .top2{color:var(--accent);font-weight:600}
+
+.desktop-layout{display:none}
+.confirm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;justify-content:center;align-items:center}
+.confirm-overlay.show{display:flex}
+.confirm-box{background:var(--card2);border-radius:1rem;padding:1.75rem;text-align:center;max-width:300px;border:1px solid var(--border);margin:1rem}
+.confirm-box h3{margin-bottom:0.75rem;font-size:0.95rem}
+.confirm-box p{font-size:0.8rem;color:var(--text2);margin-bottom:1.5rem}
+.confirm-box .btns{display:flex;gap:0.5rem;justify-content:center}
+.btn{padding:0.45rem 1rem;border-radius:0.5rem;border:1px solid var(--border);background:var(--card);color:var(--text2);font-size:0.8rem;cursor:pointer;transition:all 0.2s;font-weight:500}
+.btn:hover{background:var(--card2);color:var(--text)}
+.btn.danger{border-color:rgba(244,67,54,0.5);color:var(--red)}
+.btn.danger:hover{background:var(--red);color:white}
+.btn.share{border-color:rgba(0,229,255,0.4);color:var(--accent)}
+.btn.share:hover{background:var(--accent);color:var(--bg)}
+.share-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;justify-content:center;align-items:center}
+.share-overlay.show{display:flex}
+.share-box{background:var(--card2);border-radius:1rem;padding:1.5rem;max-width:380px;width:calc(100% - 2rem);border:1px solid var(--border);margin:1rem}
+.share-box h3{margin-bottom:0.75rem;font-size:0.95rem}
+.share-box p{font-size:0.75rem;color:var(--text2);margin-bottom:0.75rem;line-height:1.4}
+.share-link-box{background:var(--bg);border:1px solid var(--border);border-radius:0.5rem;padding:0.5rem;font-size:0.7rem;color:var(--accent);word-break:break-all;max-height:80px;overflow-y:auto;margin-bottom:0.75rem;font-family:monospace;line-height:1.4}
+.share-btns{display:flex;gap:0.5rem;flex-wrap:wrap}
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--card2);border:1px solid var(--accent);color:var(--accent);padding:0.5rem 1rem;border-radius:0.5rem;font-size:0.8rem;z-index:300;opacity:0;transition:opacity 0.3s;pointer-events:none}
+.toast.show{opacity:1}
+
+@media(min-width:768px){
+  html{font-size:15px}
+  .mobile-only{display:none}
+  .desktop-layout{display:grid;grid-template-columns:3fr 2fr;gap:1rem;padding:0.75rem}
+  .desktop-matches{grid-column:1}
+  .desktop-groups{grid-column:2;position:sticky;top:4.5rem;max-height:calc(100vh - 5.5rem);overflow-y:auto;padding-right:0.25rem}
+  .desktop-groups::-webkit-scrollbar{width:4px}
+  .desktop-groups::-webkit-scrollbar-track{background:var(--bg)}
+  .desktop-groups::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+  .content.mobile-content{display:none!important}
+  .content.mobile-content.active{display:none!important}
+  .header{padding:0.5rem 1.5rem}
+  .match-card{margin-bottom:0.5rem}
+  .group-section{margin-bottom:0.75rem}
+  .group-table{min-width:460px}
+}
+@media(min-width:1200px){
+  .desktop-layout{grid-template-columns:3fr 2fr}
+  .group-table{min-width:500px}
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-top">
+    <h1>MUNDIAL 2026<span>Estados Unidos · México · Canadá</span></h1>
+    <div class="header-actions">
+
+      <button class="btn-icon danger mobile-only" onclick="confirmReset()" title="Limpiar resultados">&#9851;</button>
+    </div>
+  </div>
+  <div class="tabs" id="tabs"></div>
+</div>
+<div class="content mobile-content" id="mobileContent"></div>
+<div class="desktop-layout" id="desktopLayout">
+  <div class="desktop-matches" id="desktopMatches"></div>
+  <div class="desktop-groups" id="desktopGroups"></div>
+</div>
+
+<div class="confirm-overlay" id="confirmOverlay" onclick="closeConfirm()">
+  <div class="confirm-box" onclick="event.stopPropagation()">
+    <h3>&#191;Limpiar todos los resultados?</h3>
+    <p>Esta acci&#243;n no se puede deshacer</p>
+    <div class="btns">
+      <button class="btn" onclick="closeConfirm()">Cancelar</button>
+      <button class="btn danger" onclick="doReset()">Limpiar</button>
+    </div>
+  </div>
+</div>
+
+
+<div class="toast" id="toast">Link copiado!</div>
+
+<script>
+const TEAMS = [{"name":"Mexico","fifa_code":"MEX","group":"A"},{"name":"South Africa","fifa_code":"RSA","group":"A"},{"name":"South Korea","fifa_code":"KOR","group":"A"},{"name":"Czech Republic","fifa_code":"CZE","group":"A"},{"name":"Canada","fifa_code":"CAN","group":"B"},{"name":"Bosnia & Herzegovina","fifa_code":"BIH","group":"B"},{"name":"Qatar","fifa_code":"QAT","group":"B"},{"name":"Switzerland","fifa_code":"SUI","group":"B"},{"name":"Brazil","fifa_code":"BRA","group":"C"},{"name":"Morocco","fifa_code":"MAR","group":"C"},{"name":"Haiti","fifa_code":"HAI","group":"C"},{"name":"Scotland","fifa_code":"SCO","group":"C"},{"name":"USA","fifa_code":"USA","group":"D"},{"name":"Paraguay","fifa_code":"PAR","group":"D"},{"name":"Australia","fifa_code":"AUS","group":"D"},{"name":"Turkey","fifa_code":"TUR","group":"D"},{"name":"Germany","fifa_code":"GER","group":"E"},{"name":"Curaçao","fifa_code":"CUW","group":"E"},{"name":"Ivory Coast","fifa_code":"CIV","group":"E"},{"name":"Ecuador","fifa_code":"ECU","group":"E"},{"name":"Netherlands","fifa_code":"NED","group":"F"},{"name":"Japan","fifa_code":"JPN","group":"F"},{"name":"Sweden","fifa_code":"SWE","group":"F"},{"name":"Tunisia","fifa_code":"TUN","group":"F"},{"name":"Belgium","fifa_code":"BEL","group":"G"},{"name":"Egypt","fifa_code":"EGY","group":"G"},{"name":"Iran","fifa_code":"IRN","group":"G"},{"name":"New Zealand","fifa_code":"NZL","group":"G"},{"name":"Spain","fifa_code":"ESP","group":"H"},{"name":"Cape Verde","fifa_code":"CPV","group":"H"},{"name":"Saudi Arabia","fifa_code":"KSA","group":"H"},{"name":"Uruguay","fifa_code":"URU","group":"H"},{"name":"France","fifa_code":"FRA","group":"I"},{"name":"Senegal","fifa_code":"SEN","group":"I"},{"name":"Iraq","fifa_code":"IRQ","group":"I"},{"name":"Norway","fifa_code":"NOR","group":"I"},{"name":"Argentina","fifa_code":"ARG","group":"J"},{"name":"Algeria","fifa_code":"ALG","group":"J"},{"name":"Austria","fifa_code":"AUT","group":"J"},{"name":"Jordan","fifa_code":"JOR","group":"J"},{"name":"Portugal","fifa_code":"POR","group":"K"},{"name":"DR Congo","fifa_code":"COD","group":"K"},{"name":"Uzbekistan","fifa_code":"UZB","group":"K"},{"name":"Colombia","fifa_code":"COL","group":"K"},{"name":"England","fifa_code":"ENG","group":"L"},{"name":"Croatia","fifa_code":"CRO","group":"L"},{"name":"Ghana","fifa_code":"GHA","group":"L"},{"name":"Panama","fifa_code":"PAN","group":"L"}];
+
+const GROUPS = [{"name":"Group A","teams":["Mexico","South Africa","South Korea","Czech Republic"]},{"name":"Group B","teams":["Canada","Bosnia & Herzegovina","Qatar","Switzerland"]},{"name":"Group C","teams":["Brazil","Morocco","Haiti","Scotland"]},{"name":"Group D","teams":["USA","Paraguay","Australia","Turkey"]},{"name":"Group E","teams":["Germany","Curaçao","Ivory Coast","Ecuador"]},{"name":"Group F","teams":["Netherlands","Japan","Sweden","Tunisia"]},{"name":"Group G","teams":["Belgium","Egypt","Iran","New Zealand"]},{"name":"Group H","teams":["Spain","Cape Verde","Saudi Arabia","Uruguay"]},{"name":"Group I","teams":["France","Senegal","Iraq","Norway"]},{"name":"Group J","teams":["Argentina","Algeria","Austria","Jordan"]},{"name":"Group K","teams":["Portugal","DR Congo","Uzbekistan","Colombia"]},{"name":"Group L","teams":["England","Croatia","Ghana","Panama"]}];
+
+const MATCHES = [{"round":"Matchday 1","date":"2026-06-11","time":"13:00 UTC-6","team1":"Mexico","team2":"South Africa","group":"Group A","ground":"Mexico City"},{"round":"Matchday 1","date":"2026-06-11","time":"20:00 UTC-6","team1":"South Korea","team2":"Czech Republic","group":"Group A","ground":"Guadalajara (Zapopan)"},{"round":"Matchday 8","date":"2026-06-18","time":"12:00 UTC-4","team1":"Czech Republic","team2":"South Africa","group":"Group A","ground":"Atlanta"},{"round":"Matchday 8","date":"2026-06-18","time":"19:00 UTC-6","team1":"Mexico","team2":"South Korea","group":"Group A","ground":"Guadalajara (Zapopan)"},{"round":"Matchday 14","date":"2026-06-24","time":"19:00 UTC-6","team1":"Czech Republic","team2":"Mexico","group":"Group A","ground":"Mexico City"},{"round":"Matchday 14","date":"2026-06-24","time":"19:00 UTC-6","team1":"South Africa","team2":"South Korea","group":"Group A","ground":"Monterrey (Guadalupe)"},{"round":"Matchday 2","date":"2026-06-12","time":"15:00 UTC-4","team1":"Canada","team2":"Bosnia & Herzegovina","group":"Group B","ground":"Toronto"},{"round":"Matchday 3","date":"2026-06-13","time":"12:00 UTC-7","team1":"Qatar","team2":"Switzerland","group":"Group B","ground":"San Francisco Bay Area (Santa Clara)"},{"round":"Matchday 8","date":"2026-06-18","time":"12:00 UTC-7","team1":"Switzerland","team2":"Bosnia & Herzegovina","group":"Group B","ground":"Los Angeles (Inglewood)"},{"round":"Matchday 8","date":"2026-06-18","time":"15:00 UTC-7","team1":"Canada","team2":"Qatar","group":"Group B","ground":"Vancouver"},{"round":"Matchday 14","date":"2026-06-24","time":"12:00 UTC-7","team1":"Switzerland","team2":"Canada","group":"Group B","ground":"Vancouver"},{"round":"Matchday 14","date":"2026-06-24","time":"12:00 UTC-7","team1":"Bosnia & Herzegovina","team2":"Qatar","group":"Group B","ground":"Seattle"},{"round":"Matchday 3","date":"2026-06-13","time":"18:00 UTC-4","team1":"Brazil","team2":"Morocco","group":"Group C","ground":"New York/New Jersey (East Rutherford)"},{"round":"Matchday 3","date":"2026-06-13","time":"21:00 UTC-4","team1":"Haiti","team2":"Scotland","group":"Group C","ground":"Boston (Foxborough)"},{"round":"Matchday 9","date":"2026-06-19","time":"18:00 UTC-4","team1":"Scotland","team2":"Morocco","group":"Group C","ground":"Boston (Foxborough)"},{"round":"Matchday 9","date":"2026-06-19","time":"20:30 UTC-4","team1":"Brazil","team2":"Haiti","group":"Group C","ground":"Philadelphia"},{"round":"Matchday 14","date":"2026-06-24","time":"18:00 UTC-4","team1":"Scotland","team2":"Brazil","group":"Group C","ground":"Miami (Miami Gardens)"},{"round":"Matchday 14","date":"2026-06-24","time":"18:00 UTC-4","team1":"Morocco","team2":"Haiti","group":"Group C","ground":"Atlanta"},{"round":"Matchday 2","date":"2026-06-12","time":"18:00 UTC-7","team1":"USA","team2":"Paraguay","group":"Group D","ground":"Los Angeles (Inglewood)"},{"round":"Matchday 3","date":"2026-06-13","time":"21:00 UTC-7","team1":"Australia","team2":"Turkey","group":"Group D","ground":"Vancouver"},{"round":"Matchday 9","date":"2026-06-19","time":"12:00 UTC-7","team1":"USA","team2":"Australia","group":"Group D","ground":"Seattle"},{"round":"Matchday 9","date":"2026-06-19","time":"20:00 UTC-7","team1":"Turkey","team2":"Paraguay","group":"Group D","ground":"San Francisco Bay Area (Santa Clara)"},{"round":"Matchday 15","date":"2026-06-25","time":"19:00 UTC-7","team1":"Turkey","team2":"USA","group":"Group D","ground":"Los Angeles (Inglewood)"},{"round":"Matchday 15","date":"2026-06-25","time":"19:00 UTC-7","team1":"Paraguay","team2":"Australia","group":"Group D","ground":"San Francisco Bay Area (Santa Clara)"},{"round":"Matchday 4","date":"2026-06-14","time":"12:00 UTC-5","team1":"Germany","team2":"Curaçao","group":"Group E","ground":"Houston"},{"round":"Matchday 4","date":"2026-06-14","time":"19:00 UTC-4","team1":"Ivory Coast","team2":"Ecuador","group":"Group E","ground":"Philadelphia"},{"round":"Matchday 10","date":"2026-06-20","time":"16:00 UTC-4","team1":"Germany","team2":"Ivory Coast","group":"Group E","ground":"Toronto"},{"round":"Matchday 10","date":"2026-06-20","time":"19:00 UTC-5","team1":"Ecuador","team2":"Curaçao","group":"Group E","ground":"Kansas City"},{"round":"Matchday 15","date":"2026-06-25","time":"16:00 UTC-4","team1":"Curaçao","team2":"Ivory Coast","group":"Group E","ground":"Philadelphia"},{"round":"Matchday 15","date":"2026-06-25","time":"16:00 UTC-4","team1":"Ecuador","team2":"Germany","group":"Group E","ground":"New York/New Jersey (East Rutherford)"},{"round":"Matchday 4","date":"2026-06-14","time":"15:00 UTC-5","team1":"Netherlands","team2":"Japan","group":"Group F","ground":"Dallas (Arlington)"},{"round":"Matchday 4","date":"2026-06-14","time":"20:00 UTC-6","team1":"Sweden","team2":"Tunisia","group":"Group F","ground":"Monterrey (Guadalupe)"},{"round":"Matchday 10","date":"2026-06-20","time":"12:00 UTC-5","team1":"Netherlands","team2":"Sweden","group":"Group F","ground":"Houston"},{"round":"Matchday 10","date":"2026-06-20","time":"22:00 UTC-6","team1":"Tunisia","team2":"Japan","group":"Group F","ground":"Monterrey (Guadalupe)"},{"round":"Matchday 15","date":"2026-06-25","time":"18:00 UTC-5","team1":"Japan","team2":"Sweden","group":"Group F","ground":"Dallas (Arlington)"},{"round":"Matchday 15","date":"2026-06-25","time":"18:00 UTC-5","team1":"Tunisia","team2":"Netherlands","group":"Group F","ground":"Kansas City"},{"round":"Matchday 5","date":"2026-06-15","time":"12:00 UTC-7","team1":"Belgium","team2":"Egypt","group":"Group G","ground":"Seattle"},{"round":"Matchday 5","date":"2026-06-15","time":"18:00 UTC-7","team1":"Iran","team2":"New Zealand","group":"Group G","ground":"Los Angeles (Inglewood)"},{"round":"Matchday 11","date":"2026-06-21","time":"12:00 UTC-7","team1":"Belgium","team2":"Iran","group":"Group G","ground":"Los Angeles (Inglewood)"},{"round":"Matchday 11","date":"2026-06-21","time":"18:00 UTC-7","team1":"New Zealand","team2":"Egypt","group":"Group G","ground":"Vancouver"},{"round":"Matchday 16","date":"2026-06-26","time":"20:00 UTC-7","team1":"Egypt","team2":"Iran","group":"Group G","ground":"Seattle"},{"round":"Matchday 16","date":"2026-06-26","time":"20:00 UTC-7","team1":"New Zealand","team2":"Belgium","group":"Group G","ground":"Vancouver"},{"round":"Matchday 5","date":"2026-06-15","time":"12:00 UTC-4","team1":"Spain","team2":"Cape Verde","group":"Group H","ground":"Atlanta"},{"round":"Matchday 5","date":"2026-06-15","time":"18:00 UTC-4","team1":"Saudi Arabia","team2":"Uruguay","group":"Group H","ground":"Miami (Miami Gardens)"},{"round":"Matchday 11","date":"2026-06-21","time":"12:00 UTC-4","team1":"Spain","team2":"Saudi Arabia","group":"Group H","ground":"Atlanta"},{"round":"Matchday 11","date":"2026-06-21","time":"18:00 UTC-4","team1":"Uruguay","team2":"Cape Verde","group":"Group H","ground":"Miami (Miami Gardens)"},{"round":"Matchday 16","date":"2026-06-26","time":"19:00 UTC-5","team1":"Cape Verde","team2":"Saudi Arabia","group":"Group H","ground":"Houston"},{"round":"Matchday 16","date":"2026-06-26","time":"18:00 UTC-6","team1":"Uruguay","team2":"Spain","group":"Group H","ground":"Guadalajara (Zapopan)"},{"round":"Matchday 6","date":"2026-06-16","time":"15:00 UTC-4","team1":"France","team2":"Senegal","group":"Group I","ground":"New York/New Jersey (East Rutherford)"},{"round":"Matchday 6","date":"2026-06-16","time":"18:00 UTC-4","team1":"Iraq","team2":"Norway","group":"Group I","ground":"Boston (Foxborough)"},{"round":"Matchday 12","date":"2026-06-22","time":"17:00 UTC-4","team1":"France","team2":"Iraq","group":"Group I","ground":"Philadelphia"},{"round":"Matchday 12","date":"2026-06-22","time":"20:00 UTC-4","team1":"Norway","team2":"Senegal","group":"Group I","ground":"New York/New Jersey (East Rutherford)"},{"round":"Matchday 16","date":"2026-06-26","time":"15:00 UTC-4","team1":"Norway","team2":"France","group":"Group I","ground":"Boston (Foxborough)"},{"round":"Matchday 16","date":"2026-06-26","time":"15:00 UTC-4","team1":"Senegal","team2":"Iraq","group":"Group I","ground":"Toronto"},{"round":"Matchday 6","date":"2026-06-16","time":"20:00 UTC-5","team1":"Argentina","team2":"Algeria","group":"Group J","ground":"Kansas City"},{"round":"Matchday 6","date":"2026-06-16","time":"21:00 UTC-7","team1":"Austria","team2":"Jordan","group":"Group J","ground":"San Francisco Bay Area (Santa Clara)"},{"round":"Matchday 12","date":"2026-06-22","time":"12:00 UTC-5","team1":"Argentina","team2":"Austria","group":"Group J","ground":"Dallas (Arlington)"},{"round":"Matchday 12","date":"2026-06-22","time":"20:00 UTC-7","team1":"Jordan","team2":"Algeria","group":"Group J","ground":"San Francisco Bay Area (Santa Clara)"},{"round":"Matchday 17","date":"2026-06-27","time":"21:00 UTC-5","team1":"Algeria","team2":"Austria","group":"Group J","ground":"Kansas City"},{"round":"Matchday 17","date":"2026-06-27","time":"21:00 UTC-5","team1":"Jordan","team2":"Argentina","group":"Group J","ground":"Dallas (Arlington)"},{"round":"Matchday 7","date":"2026-06-17","time":"12:00 UTC-5","team1":"Portugal","team2":"DR Congo","group":"Group K","ground":"Houston"},{"round":"Matchday 7","date":"2026-06-17","time":"20:00 UTC-6","team1":"Uzbekistan","team2":"Colombia","group":"Group K","ground":"Mexico City"},{"round":"Matchday 13","date":"2026-06-23","time":"12:00 UTC-5","team1":"Portugal","team2":"Uzbekistan","group":"Group K","ground":"Houston"},{"round":"Matchday 13","date":"2026-06-23","time":"20:00 UTC-6","team1":"Colombia","team2":"DR Congo","group":"Group K","ground":"Guadalajara (Zapopan)"},{"round":"Matchday 17","date":"2026-06-27","time":"19:30 UTC-4","team1":"Colombia","team2":"Portugal","group":"Group K","ground":"Miami (Miami Gardens)"},{"round":"Matchday 17","date":"2026-06-27","time":"19:30 UTC-4","team1":"DR Congo","team2":"Uzbekistan","group":"Group K","ground":"Atlanta"},{"round":"Matchday 7","date":"2026-06-17","time":"15:00 UTC-5","team1":"England","team2":"Croatia","group":"Group L","ground":"Dallas (Arlington)"},{"round":"Matchday 7","date":"2026-06-17","time":"19:00 UTC-4","team1":"Ghana","team2":"Panama","group":"Group L","ground":"Toronto"},{"round":"Matchday 13","date":"2026-06-23","time":"16:00 UTC-4","team1":"England","team2":"Ghana","group":"Group L","ground":"Boston (Foxborough)"},{"round":"Matchday 13","date":"2026-06-23","time":"19:00 UTC-4","team1":"Panama","team2":"Croatia","group":"Group L","ground":"Toronto"},{"round":"Matchday 17","date":"2026-06-27","time":"17:00 UTC-4","team1":"Panama","team2":"England","group":"Group L","ground":"New York/New Jersey (East Rutherford)"},{"round":"Matchday 17","date":"2026-06-27","time":"17:00 UTC-4","team1":"Croatia","team2":"Ghana","group":"Group L","ground":"Philadelphia"},{"round":"Round of 32","num":73,"date":"2026-06-28","time":"12:00 UTC-7","team1":"2A","team2":"2B","ground":"Los Angeles (Inglewood)"},{"round":"Round of 32","num":74,"date":"2026-06-29","time":"16:30 UTC-4","team1":"1E","team2":"3A/B/C/D/F","ground":"Boston (Foxborough)"},{"round":"Round of 32","num":75,"date":"2026-06-29","time":"19:00 UTC-6","team1":"1F","team2":"2C","ground":"Monterrey (Guadalupe)"},{"round":"Round of 32","num":76,"date":"2026-06-29","time":"12:00 UTC-5","team1":"1C","team2":"2F","ground":"Houston"},{"round":"Round of 32","num":77,"date":"2026-06-30","time":"17:00 UTC-4","team1":"1I","team2":"3C/D/F/G/H","ground":"New York/New Jersey (East Rutherford)"},{"round":"Round of 32","num":78,"date":"2026-06-30","time":"12:00 UTC-5","team1":"2E","team2":"2I","ground":"Dallas (Arlington)"},{"round":"Round of 32","num":79,"date":"2026-06-30","time":"19:00 UTC-6","team1":"1A","team2":"3C/E/F/H/I","ground":"Mexico City"},{"round":"Round of 32","num":80,"date":"2026-07-01","time":"12:00 UTC-4","team1":"1L","team2":"3E/H/I/J/K","ground":"Atlanta"},{"round":"Round of 32","num":81,"date":"2026-07-01","time":"17:00 UTC-7","team1":"1D","team2":"3B/E/F/I/J","ground":"San Francisco Bay Area (Santa Clara)"},{"round":"Round of 32","num":82,"date":"2026-07-01","time":"13:00 UTC-7","team1":"1G","team2":"3A/E/H/I/J","ground":"Seattle"},{"round":"Round of 32","num":83,"date":"2026-07-02","time":"19:00 UTC-4","team1":"2K","team2":"2L","ground":"Toronto"},{"round":"Round of 32","num":84,"date":"2026-07-02","time":"12:00 UTC-7","team1":"1H","team2":"2J","ground":"Los Angeles (Inglewood)"},{"round":"Round of 32","num":85,"date":"2026-07-02","time":"20:00 UTC-7","team1":"1B","team2":"3E/F/G/I/J","ground":"Vancouver"},{"round":"Round of 32","num":86,"date":"2026-07-03","time":"18:00 UTC-4","team1":"1J","team2":"2H","ground":"Miami (Miami Gardens)"},{"round":"Round of 32","num":87,"date":"2026-07-03","time":"20:30 UTC-5","team1":"1K","team2":"3D/E/I/J/L","ground":"Kansas City"},{"round":"Round of 32","num":88,"date":"2026-07-03","time":"13:00 UTC-5","team1":"2D","team2":"2G","ground":"Dallas (Arlington)"},{"round":"Round of 16","num":89,"date":"2026-07-04","time":"17:00 UTC-4","team1":"W74","team2":"W77","ground":"Philadelphia"},{"round":"Round of 16","num":90,"date":"2026-07-04","time":"12:00 UTC-5","team1":"W73","team2":"W75","ground":"Houston"},{"round":"Round of 16","num":91,"date":"2026-07-05","time":"16:00 UTC-4","team1":"W76","team2":"W78","ground":"New York/New Jersey (East Rutherford)"},{"round":"Round of 16","num":92,"date":"2026-07-05","time":"18:00 UTC-6","team1":"W79","team2":"W80","ground":"Mexico City"},{"round":"Round of 16","num":93,"date":"2026-07-06","time":"14:00 UTC-5","team1":"W83","team2":"W84","ground":"Dallas (Arlington)"},{"round":"Round of 16","num":94,"date":"2026-07-06","time":"17:00 UTC-7","team1":"W81","team2":"W82","ground":"Seattle"},{"round":"Round of 16","num":95,"date":"2026-07-07","time":"12:00 UTC-4","team1":"W86","team2":"W88","ground":"Atlanta"},{"round":"Round of 16","num":96,"date":"2026-07-07","time":"13:00 UTC-7","team1":"W85","team2":"W87","ground":"Vancouver"},{"round":"Quarter-final","num":97,"date":"2026-07-09","time":"16:00 UTC-4","team1":"W89","team2":"W90","ground":"Boston (Foxborough)"},{"round":"Quarter-final","num":98,"date":"2026-07-10","time":"12:00 UTC-7","team1":"W93","team2":"W94","ground":"Los Angeles (Inglewood)"},{"round":"Quarter-final","num":99,"date":"2026-07-11","time":"17:00 UTC-4","team1":"W91","team2":"W92","ground":"Miami (Miami Gardens)"},{"round":"Quarter-final","num":100,"date":"2026-07-11","time":"20:00 UTC-5","team1":"W95","team2":"W96","ground":"Kansas City"},{"round":"Semi-final","num":101,"date":"2026-07-14","time":"14:00 UTC-5","team1":"W97","team2":"W98","ground":"Dallas (Arlington)"},{"round":"Semi-final","num":102,"date":"2026-07-15","time":"15:00 UTC-4","team1":"W99","team2":"W100","ground":"Atlanta"},{"round":"Match for third place","num":103,"date":"2026-07-18","time":"17:00 UTC-4","team1":"L101","team2":"L102","ground":"Miami (Miami Gardens)"},{"round":"Final","num":104,"date":"2026-07-19","time":"15:00 UTC-4","team1":"W101","team2":"W102","ground":"New York/New Jersey (East Rutherford)"}];
+
+const teamMap = {};
+TEAMS.forEach(t => teamMap[t.name] = t);
+
+const GROUP_LETTERS = 'ABCDEFGHIJKL'.split('');
+const GROUP_NAMES = GROUP_LETTERS.map(l => 'Group ' + l);
+
+let results = {};
+let currentTab = 'matches';
+let currentFilter = 'all';
+
+function loadResults() {
+  try {
+    const saved = localStorage.getItem('wc2026_results');
+    if (saved) results = JSON.parse(saved);
+  } catch(e) { results = {}; }
+}
+
+function saveResults() {
+  localStorage.setItem('wc2026_results', JSON.stringify(results));
+}
+
+function matchKey(m) {
+  if (m.num) return 'ko_' + m.num;
+  return m.team1 + '_vs_' + m.team2 + '_' + m.date;
+}
+
+function formatDate(dateStr) {
+  const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const days = ['Dom','Lun','Mar','Mie','Jue','Vie','Sab'];
+  const d = new Date(dateStr + 'T12:00:00');
+  return days[d.getDay()] + ' ' + d.getDate() + ' ' + months[d.getMonth()];
+}
+
+function formatRound(round) {
+  const map = {
+    'Matchday 1':'Jornada 1','Matchday 2':'Jornada 2','Matchday 3':'Jornada 3',
+    'Matchday 4':'Jornada 4','Matchday 5':'Jornada 5','Matchday 6':'Jornada 6',
+    'Matchday 7':'Jornada 7','Matchday 8':'Jornada 8','Matchday 9':'Jornada 9',
+    'Matchday 10':'Jornada 10','Matchday 11':'Jornada 11','Matchday 12':'Jornada 12',
+    'Matchday 13':'Jornada 13','Matchday 14':'Jornada 14','Matchday 15':'Jornada 15',
+    'Matchday 16':'Jornada 16','Matchday 17':'Jornada 17',
+    'Round of 32':'Octavos de Final','Round of 16':'Dieciseisavos de Final',
+    'Quarter-final':'Cuartos de Final','Semi-final':'Semifinal',
+    'Match for third place':'Tercer Puesto','Final':'Final'
+  };
+  return map[round] || round;
+}
+
+function isGroupMatch(m) {
+  return m.group && m.group.startsWith('Group');
+}
+
+function getGroupMatches(groupName) {
+  return MATCHES.filter(m => m.group === groupName);
+}
+
+function getGroupLetter(groupName) {
+  return groupName.replace('Group ', '');
+}
+
+function getCode(teamName) {
+  const t = teamMap[teamName];
+  return t ? t.fifa_code : '';
+}
+
+function resolveTeamRef(ref) {
+  if (!ref) return { name: '', placeholder: true };
+  const match = ref.match(/^([123])([A-L])$/);
+  if (match) {
+    const pos = parseInt(match[1]);
+    const groupLetter = match[2];
+    const groupName = 'Group ' + groupLetter;
+    const standings = calculateStandings(groupName);
+    if (standings.length >= pos) {
+      return { name: standings[pos - 1].name, code: getCode(standings[pos - 1].name), placeholder: false };
+    }
+    return { name: pos + '\u00B0 ' + groupName, code: '', placeholder: true };
+  }
+  if (ref.match(/^[123].*\//)) {
+    return { name: ref, code: '', placeholder: true };
+  }
+  if (ref.startsWith('W') || ref.startsWith('L')) {
+    const num = parseInt(ref.substring(1));
+    const koResult = results['ko_' + num];
+    if (koResult && koResult[0] !== null && koResult[1] !== null) {
+      const parentMatch = MATCHES.find(m => m.num === num);
+      if (parentMatch) {
+        const isWinner = ref.startsWith('W');
+        let teamRef;
+        if (koResult[0] > koResult[1]) {
+          teamRef = isWinner ? parentMatch.team1 : parentMatch.team2;
+        } else if (koResult[0] < koResult[1]) {
+          teamRef = isWinner ? parentMatch.team2 : parentMatch.team1;
+        } else {
+          teamRef = isWinner ? parentMatch.team1 : parentMatch.team2;
+        }
+        const resolved = resolveTeamRef(teamRef);
+        if (!resolved.placeholder) return resolved;
+        return { name: teamRef, code: '', placeholder: true };
+      }
+    }
+    const prefix = ref.startsWith('W') ? 'Ganador ' : 'Perdedor ';
+    return { name: prefix + '#' + num, code: '', placeholder: true };
+  }
+  const t = teamMap[ref];
+  if (t) return { name: ref, code: t.fifa_code, placeholder: false };
+  return { name: ref, code: '', placeholder: false };
+}
+
+function calculateStandings(groupName) {
+  const group = GROUPS.find(g => g.name === groupName);
+  if (!group) return [];
+  const standings = {};
+  group.teams.forEach(name => {
+    standings[name] = { pj:0, pg:0, pe:0, pp:0, gf:0, gc:0, pts:0 };
+  });
+  const matches = getGroupMatches(groupName);
+  matches.forEach(m => {
+    const key = matchKey(m);
+    const result = results[key];
+    if (!result || result[0] === null || result[1] === null) return;
+    const [g1, g2] = result;
+    const t1 = m.team1, t2 = m.team2;
+    if (!standings[t1] || !standings[t2]) return;
+    standings[t1].pj++; standings[t2].pj++;
+    standings[t1].gf += g1; standings[t1].gc += g2;
+    standings[t2].gf += g2; standings[t2].gc += g1;
+    if (g1 > g2) {
+      standings[t1].pg++; standings[t2].pp++; standings[t1].pts += 3;
+    } else if (g1 < g2) {
+      standings[t2].pg++; standings[t1].pp++; standings[t2].pts += 3;
+    } else {
+      standings[t1].pe++; standings[t2].pe++; standings[t1].pts++; standings[t2].pts++;
+    }
+  });
+
+  const teamNames = group.teams.map(name => ({
+    name, code: getCode(name),
+    ...standings[name],
+    dg: standings[name].gf - standings[name].gc
+  }));
+
+  teamNames.sort((a, b) => {
+    if (b.pts !== a.pts) return b.pts - a.pts;
+    if (b.dg !== a.dg) return b.dg - a.dg;
+    if (b.gf !== a.gf) return b.gf - a.gf;
+    const h2hMatches = matches.filter(m =>
+      (m.team1 === a.name && m.team2 === b.name) || (m.team1 === b.name && m.team2 === a.name)
+    );
+    let aH2H = 0, bH2H = 0;
+    h2hMatches.forEach(m => {
+      const key = matchKey(m);
+      const result = results[key];
+      if (!result || result[0] === null || result[1] === null) return;
+      if (m.team1 === a.name) {
+        if (result[0] > result[1]) aH2H += 3;
+        else if (result[0] < result[1]) bH2H += 3;
+        else { aH2H++; bH2H++; }
+      } else {
+        if (result[1] > result[0]) aH2H += 3;
+        else if (result[1] < result[0]) bH2H += 3;
+        else { aH2H++; bH2H++; }
+      }
+    });
+    if (aH2H !== bH2H) return bH2H - aH2H;
+    return a.name.localeCompare(b.name);
+  });
+
+  return teamNames;
+}
+
+function getGroupMatchesByDate() {
+  const groupMatches = MATCHES.filter(m => isGroupMatch(m));
+  const byDate = {};
+  groupMatches.forEach(m => {
+    if (!byDate[m.date]) byDate[m.date] = [];
+    byDate[m.date].push(m);
+  });
+  return Object.keys(byDate).sort().map(date => ({
+    date,
+    matches: byDate[date].sort((a, b) => {
+      if (a.time < b.time) return -1;
+      if (a.time > b.time) return 1;
+      return a.group.localeCompare(b.group);
+    })
+  }));
+}
+
+function getKOMatches() {
+  return MATCHES.filter(m => !isGroupMatch(m)).sort((a, b) => {
+    if (a.num && b.num) return a.num - b.num;
+    return a.date.localeCompare(b.date);
+  });
+}
+
+function countPlayed() {
+  const groupMatches = MATCHES.filter(m => isGroupMatch(m));
+  let played = 0;
+  groupMatches.forEach(m => {
+    const key = matchKey(m);
+    if (results[key] && results[key][0] !== null && results[key][1] !== null) played++;
+  });
+  return { played, total: groupMatches.length };
+}
+
+function getResultIndicator(teamIdx, s1, s2) {
+  if (s1 === null || s2 === null) return '';
+  const win = teamIdx === 0 ? s1 > s2 : s2 > s1;
+  const draw = s1 === s2;
+  if (win) return 'w';
+  if (draw) return 'd';
+  return 'l';
+}
+
+function renderMatchCard(m, isKO) {
+  const key = matchKey(m);
+  const result = results[key];
+  const hasResult = result && result[0] !== null && result[1] !== null;
+  const playedClass = hasResult ? ' played' : '';
+
+  if (isKO) {
+    const t1 = resolveTeamRef(m.team1);
+    const t2 = resolveTeamRef(m.team2);
+    const t1Name = t1.placeholder ? `<span class="placeholder">${t1.name}</span>` : t1.name;
+    const t2Name = t2.placeholder ? `<span class="placeholder">${t2.name}</span>` : t2.name;
+    const t1Class = hasResult ? (result[0] > result[1] ? 'winner' : (result[0] < result[1] ? 'loser' : 'draw')) : '';
+    const t2Class = hasResult ? (result[1] > result[0] ? 'winner' : (result[1] < result[0] ? 'loser' : 'draw')) : '';
+
+    let roundLabel = formatRound(m.round);
+
+    const v1 = hasResult ? result[0] : '';
+    const v2 = hasResult ? result[1] : '';
+    const has1 = hasResult ? ' has-value' : '';
+    const has2 = hasResult ? ' has-value' : '';
+
+    return `
+      <div class="ko-match-card${playedClass}" data-key="${key}">
+        <div class="ko-match-meta">
+          <span>${roundLabel}</span>
+          <span>${formatDate(m.date)}</span>
+        </div>
+        <div class="ko-match-body">
+          <div class="ko-team home ${t1Class}">
+            <span class="name">${t1Name}</span>
+          </div>
+          <div class="ko-score">
+            <input type="number" min="0" max="99" value="${v1}" data-key="${key}" data-team="0" class="score-input${has1}" onfocus="this.select()" onchange="onScoreChange(this)" oninput="onScoreInput(this)">
+            <span class="dash">-</span>
+            <input type="number" min="0" max="99" value="${v2}" data-key="${key}" data-team="1" class="score-input${has2}" onfocus="this.select()" onchange="onScoreChange(this)" oninput="onScoreInput(this)">
+          </div>
+          <div class="ko-team away ${t2Class}">
+            <span class="name">${t2Name}</span>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  const v1 = hasResult ? result[0] : '';
+  const v2 = hasResult ? result[1] : '';
+  const has1 = hasResult ? ' has-value' : '';
+  const has2 = hasResult ? ' has-value' : '';
+  const r1 = hasResult ? getResultIndicator(0, result[0], result[1]) : '';
+  const r2 = hasResult ? getResultIndicator(1, result[0], result[1]) : '';
+
+  return `
+    <div class="match-card${playedClass}" data-key="${key}">
+      <div class="match-meta">
+        <span class="group-label">Grupo ${getGroupLetter(m.group)}</span>
+        <span>${formatDate(m.date)}</span>
+      </div>
+      <div class="match-body">
+        <div class="team home">
+          <span class="team-name">${m.team1}</span>
+          ${r1 ? `<span class="result-dot ${r1}"></span>` : ''}
+        </div>
+        <div class="score-box">
+          <input type="number" min="0" max="99" value="${v1}" data-key="${key}" data-team="0" class="score-input${has1}" onfocus="this.select()" onchange="onScoreChange(this)" oninput="onScoreInput(this)">
+          <span class="dash">&ndash;</span>
+          <input type="number" min="0" max="99" value="${v2}" data-key="${key}" data-team="1" class="score-input${has2}" onfocus="this.select()" onchange="onScoreChange(this)" oninput="onScoreInput(this)">
+        </div>
+        <div class="team away">
+          <span class="team-name">${m.team2}</span>
+          ${r2 ? `<span class="result-dot ${r2}"></span>` : ''}
+        </div>
+      </div>
+    </div>`;
+}
+
+function getTeamResult(teamName, g1, g2) {
+  if (g1 === null || g2 === null) return null;
+  if (g1 > g2) return teamName === 'home' ? 'W' : 'L';
+  if (g1 < g2) return teamName === 'home' ? 'L' : 'W';
+  return 'D';
+}
+
+function simulateGroupPositions(groupName) {
+  const group = GROUPS.find(g => g.name === groupName);
+  if (!group) return {};
+  const groupMatches = getGroupMatches(groupName);
+  const teams = group.teams;
+
+  const remaining = groupMatches.filter(m => {
+    const k = matchKey(m);
+    return !results[k] || results[k][0] === null || results[k][1] === null;
+  });
+
+  const outcomes = [];
+  function gen(i, cur) {
+    if (i === remaining.length) { outcomes.push([...cur]); return; }
+    for (const o of ['W','D','L']) { cur.push(o); gen(i+1, cur); cur.pop(); }
+  }
+  gen(0, []);
+
+  const sW = [2,1], sD = [1,1], sL = [1,2];
+
+  const pos = {};
+  teams.forEach(t => { pos[t] = [0,0,0,0]; });
+
+  outcomes.forEach(outcomes2 => {
+    const sr = {};
+    groupMatches.forEach(m => {
+      const k = matchKey(m);
+      if (results[k] && results[k][0] !== null && results[k][1] !== null) {
+        sr[k] = [results[k][0], results[k][1]];
+      }
+    });
+    remaining.forEach((m, i) => {
+      const o = outcomes2[i];
+      sr[matchKey(m)] = o === 'W' ? sW : o === 'D' ? sD : sL;
+    });
+
+    const ss = {};
+    teams.forEach(n => { ss[n] = {pj:0,pg:0,pe:0,pp:0,gf:0,gc:0,pts:0}; });
+
+    groupMatches.forEach(m => {
+      const [g1,g2] = sr[matchKey(m)];
+      const t1=m.team1, t2=m.team2;
+      ss[t1].pj++; ss[t2].pj++;
+      ss[t1].gf+=g1; ss[t1].gc+=g2; ss[t2].gf+=g2; ss[t2].gc+=g1;
+      if (g1>g2) { ss[t1].pg++; ss[t2].pp++; ss[t1].pts+=3; }
+      else if (g1<g2) { ss[t2].pg++; ss[t1].pp++; ss[t2].pts+=3; }
+      else { ss[t1].pe++; ss[t2].pe++; ss[t1].pts++; ss[t2].pts++; }
+    });
+
+    const sorted = teams.map(n => ({name:n,...ss[n],dg:ss[n].gf-ss[n].gc}));
+    sorted.sort((a,b) => {
+      if (b.pts!==a.pts) return b.pts-a.pts;
+      if (b.dg!==a.dg) return b.dg-a.dg;
+      if (b.gf!==a.gf) return b.gf-a.gf;
+      return a.name.localeCompare(b.name);
+    });
+
+    sorted.forEach((t,i) => { pos[t.name][i]++; });
+  });
+
+  const total = outcomes.length || 1;
+  const probs = {};
+  teams.forEach(t => {
+    probs[t] = pos[t].map(c => Math.round((c/total)*100));
+  });
+  return probs;
+}
+
+function renderGroupTable(groupName) {
+  const standings = calculateStandings(groupName);
+  const letter = getGroupLetter(groupName);
+  const groupMatches = getGroupMatches(groupName);
+  const played = groupMatches.filter(m => {
+    const key = matchKey(m);
+    return results[key] && results[key][0] !== null && results[key][1] !== null;
+  }).length;
+
+  const probs = simulateGroupPositions(groupName);
+
+  const rows = standings.map((t, i) => {
+    const posClass = i < 2 ? 'qualify' : '';
+    const dgVal = t.dg > 0 ? '+' + t.dg : String(t.dg);
+    const dgClass = t.dg > 0 ? 'dg pos-dg' : (t.dg < 0 ? 'dg neg' : 'dg');
+    const p = probs[t.name] || [0, 0, 0, 0];
+    const top2 = p[0] + p[1];
+    const barHtml = `<div class="prob-bar">
+      <div class="seg p1" style="width:${p[0]}%"></div>
+      <div class="seg p2" style="width:${p[1]}%"></div>
+      <div class="seg p3" style="width:${p[2]}%"></div>
+      <div class="seg p4" style="width:${p[3]}%"></div>
+    </div>`;
+    return `<tr class="${posClass}">
+      <td class="pos">${i + 1}</td>
+      <td class="team-col"><div class="team-cell"><span class="name">${t.name}</span><span class="code">${t.code}</span></div>${played < 3 ? barHtml : ''}</td>
+      <td class="pts">${t.pts}</td><td>${t.pj}</td><td>${t.pg}</td><td>${t.pe}</td><td>${t.pp}</td>
+      <td>${t.gf}</td><td>${t.gc}</td><td class="${dgClass}">${dgVal}</td>
+    </tr>`;
+  }).join('');
+
+  return `
+    <div class="group-section" data-group="${groupName}">
+      <div class="group-title" onclick="toggleGroup(this)">
+        <span>Grupo ${letter} <small style="color:var(--text3);font-weight:400">${played}/3</small></span>
+        <span class="chevron">&#9662;</span>
+      </div>
+      <div class="group-table-wrap">
+        <table class="group-table">
+          <thead>
+            <tr>
+              <th class="pos-col">#</th>
+              <th class="team-col">Equipo</th>
+              <th class="pts">Pts</th><th>PJ</th><th>PG</th><th>PE</th><th>PP</th>
+              <th>GF</th><th>GC</th><th>DG</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function toggleGroup(el) {
+  el.classList.toggle('collapsed');
+  const wrap = el.parentElement.querySelector('.group-table-wrap');
+  wrap.style.display = wrap.style.display === 'none' ? '' : 'none';
+}
+
+function onScoreChange(input) {
+  const key = input.dataset.key;
+  const teamIdx = parseInt(input.dataset.team);
+  const val = input.value.trim();
+
+  if (!results[key]) results[key] = [null, null];
+
+  if (val === '') {
+    results[key][teamIdx] = null;
+    if (results[key][0] === null && results[key][1] === null) {
+      delete results[key];
+    }
+  } else {
+    results[key][teamIdx] = parseInt(val);
+    if (isNaN(results[key][teamIdx])) {
+      results[key][teamIdx] = null;
+      if (results[key][0] === null && results[key][1] === null) delete results[key];
+    }
+  }
+
+  saveResults();
+  renderAll();
+}
+
+function onScoreInput(input) {
+  if (input.value.trim() !== '') {
+    input.classList.add('has-value');
+  } else {
+    input.classList.remove('has-value');
+  }
+}
+
+function renderMatchesView(container, filter) {
+  const byDate = getGroupMatchesByDate();
+  let html = '';
+
+  const count = countPlayed();
+  const pct = count.total > 0 ? Math.round((count.played / count.total) * 100) : 0;
+  html += `<div class="progress-text">${count.played}/${count.total} jugados (${pct}%)</div>`;
+  html += `<div class="progress-bar"><div class="fill" style="width:${pct}%"></div></div>`;
+
+  html += '<div class="group-filter" id="groupFilter">';
+  html += '<button class="filter-btn active" data-filter="all" onclick="setFilter(\'all\',this)">Todos</button>';
+  GROUP_LETTERS.forEach(l => {
+    const active = filter === l ? ' active' : '';
+    html += `<button class="filter-btn${active}" data-filter="${l}" onclick="setFilter('${l}',this)">${l}</button>`;
+  });
+  html += '</div>';
+
+  byDate.forEach(({ date, matches }) => {
+    let filtered = matches;
+    if (filter !== 'all') {
+      const groupName = 'Group ' + filter;
+      filtered = matches.filter(m => m.group === groupName);
+    }
+    if (filtered.length === 0) return;
+
+    const matchday = filtered[0].round;
+    html += `<div class="matchday-label">${formatRound(matchday)}<span class="matchday-date">${formatDate(date)}</span></div>`;
+    filtered.forEach(m => {
+      html += renderMatchCard(m, false);
+    });
+  });
+
+  container.innerHTML = html;
+}
+
+function renderGroupsView(container, showReset) {
+  let html = '';
+
+  if (showReset !== false) {
+    const count = countPlayed();
+    const pct = count.total > 0 ? Math.round((count.played / count.total) * 100) : 0;
+    html += `<div class="progress-text">${count.played}/${count.total} jugados (${pct}%)</div>`;
+    html += `<div class="progress-bar"><div class="fill" style="width:${pct}%"></div></div>`;
+    html += '<div style="display:flex;gap:0.5rem;margin-bottom:0.5rem">';
+    html += '<button class="btn share" onclick="openShare()">Compartir</button>';
+    html += '<button class="btn danger" onclick="confirmReset()">Limpiar</button>';
+    html += '</div>';
+  }
+
+  GROUP_NAMES.forEach(gn => {
+    html += renderGroupTable(gn);
+  });
+
+  container.innerHTML = html;
+}
+
+function renderKOView(container) {
+  const koMatches = getKOMatches();
+  const rounds = {};
+  koMatches.forEach(m => {
+    const r = m.round;
+    if (!rounds[r]) rounds[r] = [];
+    rounds[r].push(m);
+  });
+
+  let html = '';
+  const roundOrder = ['Round of 32','Round of 16','Quarter-final','Semi-final','Match for third place','Final'];
+
+  roundOrder.forEach(r => {
+    if (!rounds[r]) return;
+    html += `<div class="round-label">${formatRound(r)}</div>`;
+    rounds[r].forEach(m => {
+      html += renderMatchCard(m, true);
+    });
+  });
+
+  container.innerHTML = html;
+}
+
+function setFilter(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  else document.querySelector(`.filter-btn[data-filter="${filter}"]`)?.classList.add('active');
+  renderAll();
+}
+
+function renderAll() {
+  const isDesktop = window.innerWidth >= 768;
+
+  if (isDesktop) {
+    document.getElementById('mobileContent').style.display = 'none';
+    const layout = document.getElementById('desktopLayout');
+    layout.style.display = 'grid';
+    const matchesContainer = document.getElementById('desktopMatches');
+    const groupsContainer = document.getElementById('desktopGroups');
+
+    if (currentTab === 'ko') {
+      renderKOView(matchesContainer);
+    } else {
+      renderMatchesView(matchesContainer, currentFilter);
+    }
+    renderGroupsView(groupsContainer, false);
+  } else {
+    document.getElementById('desktopLayout').style.display = 'none';
+    const mobile = document.getElementById('mobileContent');
+    mobile.classList.add('active');
+    mobile.style.display = 'block';
+
+    if (currentTab === 'matches') {
+      renderMatchesView(mobile, currentFilter);
+    } else if (currentTab === 'groups') {
+      renderGroupsView(mobile);
+    } else if (currentTab === 'ko') {
+      renderKOView(mobile);
+    }
+  }
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.tab[data-tab="${tab}"]`)?.classList.add('active');
+  renderAll();
+}
+
+function initTabs() {
+  const tabsContainer = document.getElementById('tabs');
+  const tabs = [
+    { id: 'matches', label: 'Partidos', cls: '' },
+    { id: 'groups', label: 'Grupos', cls: '' },
+    { id: 'ko', label: 'Eliminaci\u00f3n', cls: 'gold' }
+  ];
+  tabsContainer.innerHTML = tabs.map(t =>
+    `<button class="tab${t.cls}${t.id === currentTab ? ' active' : ''}" data-tab="${t.id}" onclick="switchTab('${t.id}')">${t.label}</button>`
+  ).join('');
+}
+
+function confirmReset() {
+  document.getElementById('confirmOverlay').classList.add('show');
+}
+
+function closeConfirm() {
+  document.getElementById('confirmOverlay').classList.remove('show');
+}
+
+function doReset() {
+  results = {};
+  saveResults();
+  closeConfirm();
+  renderAll();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function exportResults() {
+  const keys = Object.keys(results);
+  if (keys.length === 0) return '';
+  const compact = {};
+  keys.forEach(k => {
+    if (results[k][0] !== null || results[k][1] !== null) {
+      const v1 = results[k][0] !== null ? results[k][0] : '';
+      const v2 = results[k][1] !== null ? results[k][1] : '';
+      compact[k] = v1 + ',' + v2;
+    }
+  });
+  const json = JSON.stringify(compact);
+  try {
+    return btoa(unescape(encodeURIComponent(json)));
+  } catch(e) {
+    return btoa(json);
+  }
+}
+
+function importFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  const data = params.get('r');
+  if (!data) return;
+  try {
+    const json = decodeURIComponent(escape(atob(data)));
+    const compact = JSON.parse(json);
+    const imported = {};
+    Object.keys(compact).forEach(k => {
+      const parts = String(compact[k]).split(',');
+      imported[k] = [parts[0] === '' ? null : parseInt(parts[0]), parts[1] === '' ? null : parseInt(parts[1])];
+    });
+    results = imported;
+    saveResults();
+    const url = new URL(window.location);
+    url.searchParams.delete('r');
+    window.history.replaceState({}, '', url);
+    showToast('Resultados importados!');
+  } catch(e) {
+    console.warn('Error importing from URL', e);
+  }
+}
+
+function openShare() {
+  const data = exportResults();
+  if (!data) {
+    showToast('No hay resultados para compartir');
+    return;
+  }
+  const url = new URL(window.location);
+  url.searchParams.set('r', data);
+  const shareUrl = url.toString();
+  document.getElementById('shareLink').textContent = shareUrl;
+  document.getElementById('shareOverlay').classList.add('show');
+}
+
+function closeShare() {
+  document.getElementById('shareOverlay').classList.remove('show');
+}
+
+function copyLink() {
+  const url = document.getElementById('shareLink').textContent;
+  navigator.clipboard.writeText(url).then(() => {
+    showToast('Link copiado!');
+    closeShare();
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = url;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('Link copiado!');
+    closeShare();
+  });
+}
+
+function waShare() {
+  const url = document.getElementById('shareLink').textContent;
+  window.open('https://wa.me/?text=' + encodeURIComponent('Mi Mundial 2026: ' + url));
+  closeShare();
+}
+
+function tgShare() {
+  const url = document.getElementById('shareLink').textContent;
+  window.open('https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent('Mi Mundial 2026'));
+  closeShare();
+}
+
+function init() {
+  loadResults();
+  importFromURL();
+  initTabs();
+  renderAll();
+}
+
+window.addEventListener('resize', () => {
+  renderAll();
+});
+
+init();
+</script>
+</body>
+</html>
