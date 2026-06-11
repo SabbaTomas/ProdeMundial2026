@@ -114,6 +114,26 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:v
 .prob-cell{width:50px}
 .prob-text{font-size:0.6rem;color:var(--text3);margin-top:1px;text-align:center}
 .prob-text .top2{color:var(--accent);font-weight:600}
+.prob-toggle{display:flex;gap:0.25rem;margin-bottom:0.5rem}
+.prob-toggle-btn{padding:0.35rem 0.75rem;border-radius:0.4rem;border:1px solid var(--border);background:var(--bg2);color:var(--text3);font-size:0.72rem;font-weight:600;cursor:pointer;transition:all 0.15s}
+.prob-toggle-btn:hover{background:var(--card);color:var(--text2)}
+.prob-toggle-btn.active{background:var(--accent);color:var(--bg);border-color:var(--accent)}
+.prob-table{width:100%;border-collapse:collapse;font-size:0.72rem;margin-bottom:0.75rem}
+.prob-table th{background:var(--card2);padding:0.3rem 0.2rem;text-align:center;font-weight:700;color:var(--text2);border-bottom:1px solid var(--border);font-size:0.6rem;white-space:nowrap;text-transform:uppercase;letter-spacing:0.5px}
+.prob-table th.pos-col{width:1.3rem}
+.prob-table th.team-col{text-align:left;padding-left:0.4rem;min-width:90px}
+.prob-table th.prob-col{width:3.5rem}
+.prob-table td{padding:0.3rem 0.2rem;text-align:center;border-bottom:1px solid rgba(30,58,95,0.25);white-space:nowrap}
+.prob-table td.team-col{text-align:left;padding-left:0.4rem;font-weight:500}
+.prob-table td.prob-col{font-size:0.7rem;font-weight:600}
+.prob-bar-h{height:3px;background:var(--bg);border-radius:2px;margin-top:2px;display:flex;overflow:hidden;gap:1px}
+.prob-bar-h .seg{height:100%}
+.prob-bar-h .p1{background:var(--green)}
+.prob-bar-h .p2{background:var(--accent)}
+.prob-bar-h .p3{background:var(--amber)}
+.prob-bar-h .p4{background:var(--red)}
+.prob-name{font-size:0.72rem;line-height:1.2}
+.prob-code{font-size:0.55rem;color:var(--text3);display:block}
 
 .desktop-layout{display:none}
 .confirm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;justify-content:center;align-items:center}
@@ -207,6 +227,7 @@ const GROUP_NAMES = GROUP_LETTERS.map(l => 'Group ' + l);
 let results = {};
 let currentTab = 'matches';
 let currentFilter = 'all';
+let showProbs = false;
 
 function loadResults() {
   try {
@@ -699,13 +720,71 @@ function renderGroupsView(container, showReset) {
     html += '<button class="btn share" onclick="openShare()">Compartir</button>';
     html += '<button class="btn danger" onclick="confirmReset()">Limpiar</button>';
     html += '</div>';
+    html += '<div class="prob-toggle">';
+    html += `<button class="prob-toggle-btn${!showProbs ? ' active' : ''}" onclick="toggleProbs(false)">Tabla</button>`;
+    html += `<button class="prob-toggle-btn${showProbs ? ' active' : ''}" onclick="toggleProbs(true)">Probabilidades</button>`;
+    html += '</div>';
   }
 
   GROUP_NAMES.forEach(gn => {
-    html += renderGroupTable(gn);
+    html += showProbs ? renderGroupProbTable(gn) : renderGroupTable(gn);
   });
 
   container.innerHTML = html;
+}
+
+function toggleProbs(val) {
+  showProbs = val;
+  renderAll();
+}
+
+function renderGroupProbTable(groupName) {
+  const standings = calculateStandings(groupName);
+  const letter = getGroupLetter(groupName);
+  const groupMatches = getGroupMatches(groupName);
+  const played = groupMatches.filter(m => {
+    const k = matchKey(m);
+    return results[k] && results[k][0] !== null && results[k][1] !== null;
+  }).length;
+
+  const probs = simulateGroupPositions(groupName);
+
+  const rows = standings.map((t, i) => {
+    const p = probs[t.name] || [0, 0, 0, 0];
+    const p1 = p[0], p2 = p[1];
+    const barHtml = played < 3 ? `<div class="prob-bar-h"><div class="seg p1" style="width:${p[0]}%"></div><div class="seg p2" style="width:${p[1]}%"></div><div class="seg p3" style="width:${p[2]}%"></div><div class="seg p4" style="width:${p[3]}%"></div></div>` : '';
+    return `<tr>
+      <td class="pos">${i + 1}</td>
+      <td class="team-col"><div class="team-cell"><span class="name">${t.name}</span><span class="code">${t.code}</span></div>${barHtml}</td>
+      <td class="prob-col" style="color:var(--green)">${p1}%</td>
+      <td class="prob-col" style="color:var(--accent)">${p2}%</td>
+      <td class="prob-col" style="color:var(--amber)">${p[2]}%</td>
+      <td class="prob-col" style="color:var(--red)">${p[3]}%</td>
+    </tr>`;
+  }).join('');
+
+  return `
+    <div class="group-section" data-group="${groupName}">
+      <div class="group-title" onclick="toggleGroup(this)">
+        <span>Grupo ${letter} <small style="color:var(--text3);font-weight:400">${played}/3</small></span>
+        <span class="chevron">&#9662;</span>
+      </div>
+      <div class="group-table-wrap">
+        <table class="prob-table">
+          <thead>
+            <tr>
+              <th class="pos-col">#</th>
+              <th class="team-col">Equipo</th>
+              <th class="prob-col" style="color:var(--green)">1ro</th>
+              <th class="prob-col" style="color:var(--accent)">2do</th>
+              <th class="prob-col" style="color:var(--amber)">3ro</th>
+              <th class="prob-col" style="color:var(--red)">4to</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
 }
 
 function renderKOView(container) {
