@@ -525,6 +525,12 @@ function simulateGroupPositions(groupName) {
     return !results[k] || results[k][0] === null || results[k][1] === null;
   });
 
+  if (remaining.length === groupMatches.length) {
+    const eq = {};
+    teams.forEach(t => { eq[t] = [25, 25, 25, 25]; });
+    return eq;
+  }
+
   const outcomes = [];
   function gen(i, cur) {
     if (i === remaining.length) { outcomes.push([...cur]); return; }
