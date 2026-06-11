@@ -668,7 +668,12 @@ function onScoreChange(input) {
   }
 
   saveResults();
-  renderAll();
+
+  if (input.value.trim() !== '') {
+    input.classList.add('has-value');
+  } else {
+    input.classList.remove('has-value');
+  }
 }
 
 function onScoreInput(input) {
