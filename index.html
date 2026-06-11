@@ -428,10 +428,10 @@ function renderMatchCard(m, isKO) {
 
     let roundLabel = formatRound(m.round);
 
-    const v1 = hasResult ? result[0] : '';
-    const v2 = hasResult ? result[1] : '';
-    const has1 = hasResult ? ' has-value' : '';
-    const has2 = hasResult ? ' has-value' : '';
+    const v1 = result && result[0] !== null ? result[0] : '';
+    const v2 = result && result[1] !== null ? result[1] : '';
+    const has1 = result && result[0] !== null ? ' has-value' : '';
+    const has2 = result && result[1] !== null ? ' has-value' : '';
 
     return `
       <div class="ko-match-card${playedClass}" data-key="${key}">
@@ -444,9 +444,9 @@ function renderMatchCard(m, isKO) {
             <span class="name">${t1Name}</span>
           </div>
           <div class="ko-score">
-            <input type="number" min="0" max="99" value="${v1}" data-key="${key}" data-team="0" class="score-input${has1}" onfocus="this.select()" onchange="onScoreChange(this)" oninput="onScoreInput(this)">
+            <input type="number" min="0" max="99" value="${v1}" data-key="${key}" data-team="0" class="score-input${has1}" onfocus="this.select()" oninput="onScoreInput(this)" onblur="onScoreChange(this)">
             <span class="dash">-</span>
-            <input type="number" min="0" max="99" value="${v2}" data-key="${key}" data-team="1" class="score-input${has2}" onfocus="this.select()" onchange="onScoreChange(this)" oninput="onScoreInput(this)">
+            <input type="number" min="0" max="99" value="${v2}" data-key="${key}" data-team="1" class="score-input${has2}" onfocus="this.select()" oninput="onScoreInput(this)" onblur="onScoreChange(this)">
           </div>
           <div class="ko-team away ${t2Class}">
             <span class="name">${t2Name}</span>
@@ -455,10 +455,10 @@ function renderMatchCard(m, isKO) {
       </div>`;
   }
 
-  const v1 = hasResult ? result[0] : '';
-  const v2 = hasResult ? result[1] : '';
-  const has1 = hasResult ? ' has-value' : '';
-  const has2 = hasResult ? ' has-value' : '';
+  const v1 = result && result[0] !== null ? result[0] : '';
+  const v2 = result && result[1] !== null ? result[1] : '';
+  const has1 = result && result[0] !== null ? ' has-value' : '';
+  const has2 = result && result[1] !== null ? ' has-value' : '';
   const r1 = hasResult ? getResultIndicator(0, result[0], result[1]) : '';
   const r2 = hasResult ? getResultIndicator(1, result[0], result[1]) : '';
 
@@ -474,9 +474,9 @@ function renderMatchCard(m, isKO) {
           ${r1 ? `<span class="result-dot ${r1}"></span>` : ''}
         </div>
         <div class="score-box">
-          <input type="number" min="0" max="99" value="${v1}" data-key="${key}" data-team="0" class="score-input${has1}" onfocus="this.select()" onchange="onScoreChange(this)" oninput="onScoreInput(this)">
+          <input type="number" min="0" max="99" value="${v1}" data-key="${key}" data-team="0" class="score-input${has1}" onfocus="this.select()" oninput="onScoreInput(this)" onblur="onScoreChange(this)">
           <span class="dash">&ndash;</span>
-          <input type="number" min="0" max="99" value="${v2}" data-key="${key}" data-team="1" class="score-input${has2}" onfocus="this.select()" onchange="onScoreChange(this)" oninput="onScoreInput(this)">
+          <input type="number" min="0" max="99" value="${v2}" data-key="${key}" data-team="1" class="score-input${has2}" onfocus="this.select()" oninput="onScoreInput(this)" onblur="onScoreChange(this)">
         </div>
         <div class="team away">
           <span class="team-name">${m.team2}</span>
