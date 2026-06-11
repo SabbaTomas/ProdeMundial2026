@@ -465,9 +465,9 @@ function renderMatchCard(m, isKO) {
             <span class="name">${t1Name}</span>
           </div>
           <div class="ko-score">
-            <input type="number" min="0" max="99" value="${v1}" data-key="${key}" data-team="0" class="score-input${has1}" onfocus="this.select()" oninput="onScoreInput(this)" onblur="onScoreChange(this)">
+            <input type="number" min="0" max="99" value="${v1}" data-key="${key}" data-team="0" class="score-input${has1}"  oninput="onScoreInput(this)" onblur="onScoreChange(this)">
             <span class="dash">-</span>
-            <input type="number" min="0" max="99" value="${v2}" data-key="${key}" data-team="1" class="score-input${has2}" onfocus="this.select()" oninput="onScoreInput(this)" onblur="onScoreChange(this)">
+            <input type="number" min="0" max="99" value="${v2}" data-key="${key}" data-team="1" class="score-input${has2}"  oninput="onScoreInput(this)" onblur="onScoreChange(this)">
           </div>
           <div class="ko-team away ${t2Class}">
             <span class="name">${t2Name}</span>
@@ -495,9 +495,9 @@ function renderMatchCard(m, isKO) {
           ${r1 ? `<span class="result-dot ${r1}"></span>` : ''}
         </div>
         <div class="score-box">
-          <input type="number" min="0" max="99" value="${v1}" data-key="${key}" data-team="0" class="score-input${has1}" onfocus="this.select()" oninput="onScoreInput(this)" onblur="onScoreChange(this)">
+          <input type="number" min="0" max="99" value="${v1}" data-key="${key}" data-team="0" class="score-input${has1}"  oninput="onScoreInput(this)" onblur="onScoreChange(this)">
           <span class="dash">&ndash;</span>
-          <input type="number" min="0" max="99" value="${v2}" data-key="${key}" data-team="1" class="score-input${has2}" onfocus="this.select()" oninput="onScoreInput(this)" onblur="onScoreChange(this)">
+          <input type="number" min="0" max="99" value="${v2}" data-key="${key}" data-team="1" class="score-input${has2}"  oninput="onScoreInput(this)" onblur="onScoreChange(this)">
         </div>
         <div class="team away">
           <span class="team-name">${m.team2}</span>
